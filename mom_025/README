@@ -1,0 +1,11 @@
+MODEL=access-om2-025
+EXPT=025deg_jra55v13_iaf_gmredi6
+
+# Ocean data
+SUBMODEL=ocean
+# ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc .
+splitvar -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -x average_T1 -x average_T2 -x average_DT -x time_bounds ${COSIMADIR}/${MODEL}/${EXPT}/output00[0-5]/${SUBMODEL}/ocean_month.nc
+
+# Ice data
+SUBMODEL=ice
+splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor ${COSIMADIR}/${MODEL}/${EXPT}/output00[0-5]/${SUBMODEL}/OUTPUT/iceh.19*.nc
