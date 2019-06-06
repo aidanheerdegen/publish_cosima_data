@@ -4,8 +4,10 @@ EXPT=025deg_jra55v13_iaf_gmredi6
 # Ocean data
 SUBMODEL=ocean
 ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc .
-splitvar -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -x average_T1 -x average_T2 -x average_DT -x time_bounds ${COSIMADIR}/${MODEL}/${EXPT}/output00[0-5]/${SUBMODEL}/ocean_month.nc
+splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} -v temp -v pot_temp -v salt -v age_global -v u -v v -v pot_rho0 -v pot_rho2 -v tx_trans -v ty_trans -v ty_trans_submeso -v tx_trans_rho -v ty_trans_rho -v ty_trans_rho_gm -v ty_trans_rho_submeso -v temp_xflux_adv -v temp_yflux_adv -v diff_cbt_t -v vert_pv -v aiso_bih ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean.nc
+
+splitvar -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -v sea_level -v sea_levelsq -v mld -v surface_temp -v surface_salt -v pme_river -v river -v runoff -v evap -v melt -v sfc_salt_flux_restore -v sfc_salt_flux_coupler -v net_sfc_heating -v tau_x -v tau_y -v bmf_u -v bmf_v -v tx_trans_int_z -v ty_trans_int_x -v aredi -v agm -v swflux -v sw_heat -v sfc_hflux_from_runoff -v sfc_hflux_coupler -v sfc_hflux_pme ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean_month.nc
 
 # Ice data
 SUBMODEL=ice
-splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor ${COSIMADIR}/${MODEL}/${EXPT}/output00[0-5]/${SUBMODEL}/OUTPUT/iceh.19*.nc
+splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v hi_m  -v hs_m  -v aice_m  -v aicen_m  -v vicen_m ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????.nc

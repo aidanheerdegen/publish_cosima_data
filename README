@@ -9,6 +9,6 @@ set -x
 COSIMADIR=/g/data3/hh5/tmp/cosima
 OUTPATH=/g/data1a/ua8/cosima-tmp/publish
 
-(cd mom_10; . README)
-#(cd mom_025; . README)
+#(cd mom_10; . README)
+(cd mom_025; . README)
 #(cd mom_01; . README)
