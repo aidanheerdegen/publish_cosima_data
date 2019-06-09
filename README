@@ -1,3 +1,10 @@
+#!/bin/bash
+#PBS -q express
+#PBS -l walltime=10:00:00,mem=5GB,wd,ncpus=8
+#PBS -N publish
+#PBS -joe
+#PBS -P v45
+
 module purge
 module use /g/data3/hh5/public/modules
 module load conda/analysis3-unstable
