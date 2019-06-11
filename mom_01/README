@@ -3,9 +3,17 @@ EXPT=01deg_jra55v13_iaf
 
 # Ocean data
 SUBMODEL=ocean
+#vars=(temp salt age_global u v pot_rho0 pot_rho2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
+
 ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc .
 splitvar -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -x average_T1 -x average_T2 -x average_DT -x time_bounds ${COSIMADIR}/${MODEL}/${EXPT}/output001/${SUBMODEL}/ocean_month.nc
 
+## In Ocean month
+#vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore  sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_x swflux sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z )
+# sea_level  -- Need to monthly average daily fields for this one.
+
 # Ice data
 SUBMODEL=ice
+#vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
+
 splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor ${COSIMADIR}/${MODEL}/${EXPT}/output001/${SUBMODEL}/OUTPUT/iceh.*.nc
