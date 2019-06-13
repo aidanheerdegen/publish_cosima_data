@@ -7,12 +7,12 @@ vars=(temp pot_temp salt age_global u v pot_rho0 pot_rho2 tx_trans ty_trans ty_t
 
 parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
 
-vars=( sea_level sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_x aredi agm swflux sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_yflux_ndiffuse_int_z temp_yflux_gm_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z temp_xflux_ndiffuse_int_z temp_xflux_gm_int_z )
+#vars=( sea_level sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_x aredi agm swflux sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_yflux_ndiffuse_int_z temp_yflux_gm_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z temp_xflux_ndiffuse_int_z temp_xflux_gm_int_z )
 
-parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
+#parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
 
 # Ice data
 SUBMODEL=ice
 vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????.nc ::: ${vars[@]}
+#parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
