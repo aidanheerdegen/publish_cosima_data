@@ -1,21 +1,21 @@
 MODEL=access-om2
-EXPT=1deg_jra55v13_iaf_spinup1_B1
+EXPT=1deg_jra55v13_iaf_spinup1_B1_lastcycle
 
 # Ocean data
 SUBMODEL=ocean
-ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc .
+ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output048/${SUBMODEL}/ocean_grid.nc .
+## 3D vars - 20 in total
+vars=(temp pot_temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_gm ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
 
-# For ocean.nc:
-#vars=(temp pot_temp salt age_global u v pot_rho0 pot_rho2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_gm ty_trans_rho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output???/${SUBMODEL}/ocean.nc ::: ${vars[@]}
 
-splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} -v temp -v pot_temp -v salt -v age_global -v u -v v -v pot_rho0 -v pot_rho2 -v tx_trans -v ty_trans -v ty_trans_submeso -v tx_trans_rho -v ty_trans_rho -v ty_trans_rho_gm -v ty_trans_rho_submeso -v temp_xflux_adv -v temp_yflux_adv -v diff_cbt_t -v vert_pv -v aiso_bih ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output05*/${SUBMODEL}/ocean.nc
 
-# For ocean_month.nc:
-#vars=(temp pot_temp salt age_global u v pot_rho0 pot_rho2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_gm ty_trans_rho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
+# 2D vars - 35 in total
+vars=( sea_level sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z aredi agm swflx sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_yflux_ndiffuse_int_z temp_yflux_gm_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z temp_xflux_ndiffuse_int_z temp_xflux_gm_int_z )
 
-splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} -v sea_level -v sea_levelsq -v mld -v surface_temp -v surface_salt -v pme_river -v river -v runoff -v evap -v melt -v sfc_salt_flux_restore -v sfc_salt_flux_coupler -v net_sfc_heating -v tau_x -v tau_y -v bmf_u -v bmf_v -v tx_trans_int_z -v ty_trans_int_x -v aredi -v agm -v swflux -v sw_heat -v sfc_hflux_from_runoff -v sfc_hflux_coupler -v sfc_hflux_pme ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output05*/${SUBMODEL}/ocean_month.nc
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output???/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
 
 # Ice data
 SUBMODEL=ice
-#vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
-splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname access-om2 -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor  -v hi_m  -v hs_m  -v aice_m  -v aicen_m  -v vicen_m ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/OUTPUT/iceh.*.nc ${COSIMADIR}/${MODEL}/${EXPT}/output05*/${SUBMODEL}/OUTPUT/iceh.*.nc
+vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m )
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output???/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
