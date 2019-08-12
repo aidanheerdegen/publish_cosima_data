@@ -1,6 +1,6 @@
 module purge
 module use /g/data3/hh5/public/modules
-module load conda/analysis3-unstable
+module load conda/analysis3
 module load parallel/20190322
 
 module list
@@ -10,6 +10,6 @@ set -x
 COSIMADIR=/g/data3/hh5/tmp/cosima
 OUTPATH=/g/data1a/ua8/cosima-tmp/publish
 
-(cd mom_10; . README)
+#(cd mom_10; . README)
 #(cd mom_025; . README)
-#(cd mom_01; . README)
+(cd ~/publish_cosima_data/mom_01; . README)
