@@ -1,24 +1,72 @@
-MODEL=access-om2-01
-EXPT=01deg_jra55v13_iaf
+export set MODEL=access-om2-01
+export set EXPT=01deg_jra55v13_iaf
+
+PATH=~/.local/bin:$PATH
 
 # Ocean data
-SUBMODEL=ocean
+export set SUBMODEL=ocean
 ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output001/${SUBMODEL}/ocean_grid.nc .
 
 ## 3D vars - 18 in total
 vars=(temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
 
-parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+vars=( salt )
+
+# 3D tenth variables are very large, so use 6 monthly frequency. 6MS = 6 monthly, start. By default
+# monthly frequency will start at the end of the end of a month, don't know why, ask pandas. This
+# produces 18GB files. 
+FREQUENCY='6MS'
+
+for var in ${vars[@]}
+do
+   qsub -q copyq -V -N ${var}.3D -l wd,walltime=1:00:00,mem=24Gb - <<END1
+module purge
+module use /g/data3/hh5/public/modules
+module load conda/analysis3-unstable
+export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+
+splitvar -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc
+END1
+done
+
+# Switch to yearly frequency for the rest of the variables
+FREQUENCY='Y'
 
 # 2D vars - 28 in total
 vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z swflx sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z )
 
-parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
+vars=( surface_temp )
+
+for var in ${vars[@]}
+do
+   qsub -q copyq -V -N ${var}.2D -l wd,walltime=1:00:00,mem=10Gb - <<END2
+module purge
+module use /g/data3/hh5/public/modules
+module load conda/analysis3-unstable
+export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+splitvar -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc
+END2
+done
 
 ## Need to get sea level by averaging daily data!!!
 
 # Ice data
-SUBMODEL=ice
-vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
+export set SUBMODEL=ice
+# vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
+vars=( hi_m )
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+# The memory requirement for the ice data means it cannot be run on copyq. For some reason
+# memory use briefly spikes above 16GB. A single process on a the dual socket nodes can only
+# access half the total physical memory, so even though it doesn't use 40Gb, you have to ask
+# for that much to make sure you're on a node with >32GB of physical memory. Or use broadwell
+# which has 128Gb of memory per 2-socket node, and ask for 20Gb
+for var in ${vars[@]}
+do
+   qsub -q express -V -N ${var}.ice -l wd,walltime=1:00:00,mem=40Gb - <<END3
+module purge
+module use /g/data3/hh5/public/modules
+module load conda/analysis3-unstable
+export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+splitvar -f $FREQUENCY -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc
+END3
+done
