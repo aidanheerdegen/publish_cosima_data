@@ -23,9 +23,9 @@ vars=(temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_su
 #module load conda/analysis3-unstable
 #export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
 
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc
-END1
-done
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc
+#END1
+#done
 
 # Switch to yearly frequency for the rest of the variables
 FREQUENCY='Y'
@@ -35,12 +35,18 @@ vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap mel
 
 for var in ${vars[@]}
 do
-   qsub -q copyq -V -N ${var}.2D -l wd,walltime=1:00:00,mem=10Gb - <<END2
+   qsub -q express -V -N ${var}.2D -l wd,walltime=1:00:00,mem=40Gb - <<END2
 module purge
 module use /g/data3/hh5/public/modules
 module load conda/analysis3-unstable
 export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
 splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-4]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean_month.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/ocean_month.nc
 END2
 done
 
@@ -52,21 +58,21 @@ vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
 
 # Make a grid file because we're going to delete all the grid information and add it back
 # as it isn't consistent across the data
-ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output020/${SUBMODEL}/OUTPUT/iceh.????-01.nc grid.nc
+ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output197/${SUBMODEL}/OUTPUT/iceh.????-12.nc grid.nc
 
 # The memory requirement for the ice data means it cannot be run on copyq. For some reason
 # memory use briefly spikes above 16GB. A single process on a the dual socket nodes can only
 # access half the total physical memory, so even though it doesn't use 40Gb, you have to ask
 # for that much to make sure you're on a node with >32GB of physical memory. Or use broadwell
 # which has 128Gb of memory per 2-socket node, and ask for 20Gb
-for var in ${vars[@]}
-do
-   qsub -q express -V -N ${var}.ice -l wd,walltime=1:00:00,mem=40Gb - <<END3
-module purge
-module use /g/data3/hh5/public/modules
-module load conda/analysis3-unstable
-export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
-splitvar --verbose -f $FREQUENCY -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc --overwrite -x albsni_m -x fcondtopn_ai_m -x Tsfc_m -x albice_m -x strength_m -x snow_ai_m -x blkmask -x fsalt_ai_m -x strtltx_m -x daidtd_m -x strairx_m -x mlt_onset_m -x snoice_m -x fswdn_m -x meltb_m -x strintx_m -x sst_m -x HTE -x tarea -x fmelttn_ai_m -x strcorx_m -x divu_m -x alidf_m -x trsig_m -x fcondtop_ai_m -x frzmlt_m -x vocn_m -x shear_m -x fswabs_ai_m -x flwup_ai_m -x uatm_m -x melts_m -x fhocn_ai_m -x dyu -x sice_m -x fsens_ai_m -x sss_m -x vatm_m -x daidtt_m -x vvel_m -x fswfac_m -x flatn_ai_m -x strtlty_m -x dyt -x strocnx_m -x fresh_ai_m -x Tair_m -x ANGLE -x dxt -x meltl_m -x albsno_m -x strinty_m -x tmask -x dxu -x congel_m -x frazil_m -x alvdf_m -x dvidtt_m -x frz_onset_m -x evap_ai_m -x strcory_m -x fsurfn_ai_m -x rain_ai_m -x HTN -x uvel_m -x fswthru_ai_m -x flwdn_m -x ice_present_m -x strocny_m -x uarea -x flat_ai_m -x ANGLET -x dvidtd_m -x strairy_m -x uocn_m -x meltt_m -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc
-END3
-done
+#for var in ${vars[@]}
+#do
+#   qsub -q express -V -N ${var}.ice -l wd,walltime=1:00:00,mem=40Gb - <<END3
+#module purge
+#module use /g/data3/hh5/public/modules
+#module load conda/analysis3-unstable
+#export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+#splitvar --verbose -f $FREQUENCY -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc --overwrite -x albsni_m -x fcondtopn_ai_m -x Tsfc_m -x albice_m -x strength_m -x snow_ai_m -x blkmask -x fsalt_ai_m -x strtltx_m -x daidtd_m -x strairx_m -x mlt_onset_m -x snoice_m -x fswdn_m -x meltb_m -x strintx_m -x sst_m -x HTE -x tarea -x fmelttn_ai_m -x strcorx_m -x divu_m -x alidf_m -x trsig_m -x fcondtop_ai_m -x frzmlt_m -x vocn_m -x shear_m -x fswabs_ai_m -x flwup_ai_m -x uatm_m -x melts_m -x fhocn_ai_m -x dyu -x sice_m -x fsens_ai_m -x sss_m -x vatm_m -x daidtt_m -x vvel_m -x fswfac_m -x flatn_ai_m -x strtlty_m -x dyt -x strocnx_m -x fresh_ai_m -x Tair_m -x ANGLE -x dxt -x meltl_m -x albsno_m -x strinty_m -x tmask -x dxu -x congel_m -x frazil_m -x alvdf_m -x dvidtt_m -x frz_onset_m -x evap_ai_m -x strcory_m -x fsurfn_ai_m -x rain_ai_m -x HTN -x uvel_m -x fswthru_ai_m -x flwdn_m -x ice_present_m -x strocny_m -x uarea -x flat_ai_m -x ANGLET -x dvidtd_m -x strairy_m -x uocn_m -x meltt_m -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc
+#END3
+#done
 
