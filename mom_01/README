@@ -8,24 +8,31 @@ export set SUBMODEL=ocean
 ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output001/${SUBMODEL}/ocean_grid.nc .
 
 ## 3D vars - 18 in total
-vars=(temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
+vars=(temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv )
+## NOT IN ALL DATASETS: aiso_bih
 
 # 3D tenth variables are very large, so use 6 monthly frequency. 6MS = 6 monthly, start. By default
 # monthly frequency will start at the end of the end of a month, don't know why, ask pandas. This
 # produces 18GB files. 
-#FREQUENCY='6MS'
+FREQUENCY='6MS'
 
-#for var in ${vars[@]}
-#do
-#   qsub -q copyq -V -N ${var}.3D -l wd,walltime=1:00:00,mem=24Gb - <<END1
-#module purge
-#module use /g/data3/hh5/public/modules
-#module load conda/analysis3-unstable
-#export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+for var in ${vars[@]}
+do
+   qsub -q express -V -N ${var}.3D -l wd,walltime=1:00:00,mem=128Gb - <<END1
+module purge
+module use /g/data3/hh5/public/modules
+module load conda/analysis3-unstable
+export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
 
 #splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc
-#END1
-#done
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-4]?/${SUBMODEL}/ocean.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean.nc
+splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/ocean.nc
+END1
+done
 
 # Switch to yearly frequency for the rest of the variables
 FREQUENCY='Y'
@@ -37,22 +44,22 @@ vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap mel
 ## REMOVE THESE VARS as they are not saved throughout:temp_yflux_submeso_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z
 
 
-for var in ${vars[@]}
-do
-   qsub -q express -V -N ${var}.2D -l wd,walltime=1:00:00,mem=40Gb - <<END2
-module purge
-module use /g/data3/hh5/public/modules
-module load conda/analysis3-unstable
-export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-4]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean_month.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/ocean_month.nc
-END2
-done
+#for var in ${vars[@]}
+#do
+#   qsub -q express -V -N ${var}.2D -l wd,walltime=1:00:00,mem=40Gb - <<END2
+#module purge
+#module use /g/data3/hh5/public/modules
+#module load conda/analysis3-unstable
+#export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-4]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean_month.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/ocean_month.nc
+#END2
+#done
 
 ## Need to get sea level by averaging daily data!!!
 
@@ -62,7 +69,7 @@ vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
 
 # Make a grid file because we're going to delete all the grid information and add it back
 # as it isn't consistent across the data
-ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output197/${SUBMODEL}/OUTPUT/iceh.????-12.nc grid.nc
+#ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output197/${SUBMODEL}/OUTPUT/iceh.????-12.nc grid.nc
 
 # The memory requirement for the ice data means it cannot be run on copyq. For some reason
 # memory use briefly spikes above 16GB. A single process on a the dual socket nodes can only
