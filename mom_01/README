@@ -29,7 +29,7 @@ export NUMPY_EXPERIMENTAL_ARRAY_FUNCTION=0
 #splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean.nc
 #splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean.nc
 #splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-4]?/${SUBMODEL}/ocean.nc
-splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean.nc
+#splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[5-7]?/${SUBMODEL}/ocean.nc
 splitvar --verbose -f $FREQUENCY -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v ${var} ${COSIMADIR}/${MODEL}/${EXPT}/output1[8-9]?/${SUBMODEL}/ocean.nc
 END1
 done
