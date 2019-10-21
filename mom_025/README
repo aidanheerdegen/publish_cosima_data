@@ -8,10 +8,28 @@ ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc .
 ## 3D vars - 20 in total
 vars=(temp pot_temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_gm ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
 
+# split up into 5 batches for easier processing.
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+
 parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
 
 # 2D vars - 35 in total
 vars=( sea_level sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z aredi agm swflx sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_yflux_ndiffuse_int_z temp_yflux_gm_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z temp_xflux_ndiffuse_int_z temp_xflux_gm_int_z )
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
 
 parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
 
@@ -19,4 +37,16 @@ parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocea
 SUBMODEL=ice
 vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m)
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+# Make a grid file because we're going to delete all the grid information and add it back
+# as it isn't consistent across the data
+ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/OUTPUT/iceh.1958-12.nc grid.nc
+
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-2]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[3-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}

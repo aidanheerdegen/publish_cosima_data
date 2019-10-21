@@ -11,36 +11,45 @@ ln -s ${COSIMADIR}/${MODEL}/${EXPT}/output048/${SUBMODEL}/ocean_grid.nc .
 ## 3D vars - 20 in total
 vars=(temp pot_temp salt age_global u v pot_rho_0 pot_rho_2 tx_trans ty_trans ty_trans_submeso tx_trans_rho ty_trans_rho ty_trans_rho_gm ty_trans_nrho_submeso temp_xflux_adv temp_yflux_adv diff_cbt_t vert_pv aiso_bih)
 
-# We don't have the memory to do the whole 300-year simulation - Batch into groups of 12
-parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output00?/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output01[0-1]/${SUBMODEL}/ocean.nc::: ${vars[@]}
+# We can't  do the whole 300-year simulation - as variables change part-way through
+# do first 4 cycles, then the last cycle separately
+parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian --datefrombounds -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[0-3]?/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output04[0-7]/${SUBMODEL}/ocean.nc ::: ${vars[@]}
 
-parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output01[2-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output02[0-3]/${SUBMODEL}/ocean.nc::: ${vars[@]}
-
-parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output02[4-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output03[0-5]/${SUBMODEL}/ocean.nc::: ${vars[@]}
-
-parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output03[6-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output04[0-7]/${SUBMODEL}/ocean.nc::: ${vars[@]}
-
-parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output05?/${SUBMODEL}/ocean.nc::: ${vars[@]}
+## Changing to lastcycle run for last cycle.
+EXPT=1deg_jra55v13_iaf_spinup1_B1_lastcycle
+parallel -j $NCPUS splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o ${OUTPATH} --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian --datefrombounds -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/ocean.nc ${COSIMADIR}/${MODEL}/${EXPT}/output05?/${SUBMODEL}/ocean.nc ::: ${vars[@]}
 
 # 2D vars - 35 in total
-# There is a smaller memory requirement here, so we can do the whole experiment in one hit
+# Do first 4 cycles first
+EXPT=1deg_jra55v13_iaf_spinup1_B1
 
 vars=( sea_level sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler net_sfc_heating tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z aredi agm swflx sw_heat sfc_hflux_from_runoff sfc_hflux_coupler sfc_hflux_pme temp_yflux_adv_int_z temp_yflux_submeso_int_z temp_yflux_ndiffuse_int_z temp_yflux_gm_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z temp_xflux_ndiffuse_int_z temp_xflux_gm_int_z )
 
+parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output?[0-3]?/${SUBMODEL}/ocean_month.nc ${COSIMADIR}/${MODEL}/${EXPT}/output04[0-7]/${SUBMODEL}/ocean.nc ::: ${vars[@]}
+
+## Changing to lastcycle run for last cycle.
+EXPT=1deg_jra55v13_iaf_spinup1_B1_lastcycle
 parallel -j $NCPUS --eta splitvar -cp -d title -d grid_type -d grid_tile -a ocean_grid.nc -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --calendar proleptic_gregorian -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output???/${SUBMODEL}/ocean_month.nc ::: ${vars[@]}
 
 # Ice data
 SUBMODEL=ice
+EXPT=1deg_jra55v13_iaf_spinup1_B1
+
+# Make a grid file because we're going to delete all the grid information and add it back
+# as it isn't consistent across the data
+ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HTN,HTE,ANGLE,ANGLET ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/OUTPUT/iceh.1958-12.nc grid.nc
 
 vars=( hi_m  hs_m  aice_m  aicen_m  vicen_m )
 
-# In this case the command strong was too long! Break up into 12 again.
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output00?/${SUBMODEL}/OUTPUT/iceh.????-??.nc {COSIMADIR}/${MODEL}/${EXPT}/output01[0-1]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+# In this case the command string was too long! Break up into 5 cycles of 12 files each
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output00?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output01[0-1]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output01[2-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc {COSIMADIR}/${MODEL}/${EXPT}/output02[0-3]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output01[2-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output02[0-3]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output02[4-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc {COSIMADIR}/${MODEL}/${EXPT}/output04[0-5]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output02[4-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output03[0-5]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output03[6-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc {COSIMADIR}/${MODEL}/${EXPT}/output04[0-7]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output03[6-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output04[0-7]/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output04[8-9]/${SUBMODEL}/OUTPUT/iceh.????-??.nc {COSIMADIR}/${MODEL}/${EXPT}/output05?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+## Changing to lastcycle run for last cycle.
+EXPT=1deg_jra55v13_iaf_spinup1_B1_lastcycle
+parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output???/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
