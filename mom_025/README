@@ -47,6 +47,6 @@ ncks -O -v TLON,TLAT,ULON,ULAT,NCAT,tmask,uarea,tarea,blkmask,dxt,dyt,dxu,dyu,HT
 
 parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output0[6-8]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+#parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output09?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ${COSIMADIR}/${MODEL}/${EXPT}/output1[0-1]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
 
-parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
+#parallel -j $NCPUS --eta splitvar -o $OUTPATH --model-type ${SUBMODEL} --simname ${MODEL} --usebounds -d contents -d source -d comment -d comment2 -d comment3 -d io_flavor -a grid.nc -v {} ${COSIMADIR}/${MODEL}/${EXPT}/output1[2-5]?/${SUBMODEL}/OUTPUT/iceh.????-??.nc ::: ${vars[@]}
