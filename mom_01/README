@@ -37,8 +37,8 @@ done
 # Switch to yearly frequency for the rest of the variables
 FREQUENCY='Y'
 
-# 2D vars - now 23 in total
-vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z swflx lw_heat sfc_hflux_from_runoff sfc_hflux_pme temp_yflux_adv_int_z )
+# 2D vars - now 22 in total
+vars=( sea_levelsq mld surface_temp surface_salt pme_river river runoff evap melt sfc_salt_flux_restore sfc_salt_flux_ice sfc_salt_flux_coupler tau_x tau_y bmf_u bmf_v tx_trans_int_z ty_trans_int_z swflx sfc_hflux_from_runoff sfc_hflux_pme temp_yflux_adv_int_z )
 ## THESE ONES are not saved: sfc_hflux_coupler
 ## THIS ONE is faulty: net_sfc_heating
 ## REMOVE THESE VARS as they are not saved throughout:temp_yflux_submeso_int_z temp_xflux_adv_int_z temp_xflux_submeso_int_z
