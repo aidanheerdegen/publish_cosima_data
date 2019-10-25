@@ -1,6 +1,6 @@
 module purge
 module use /g/data3/hh5/public/modules
-module load conda/analysis3
+module load conda/analysis3-unstable
 module load parallel/20190322
 module load pbs
 module load nco
@@ -12,6 +12,9 @@ set -x
 COSIMADIR=/g/data3/hh5/tmp/cosima
 OUTPATH=/g/data1a/ua8/cosima-tmp/publish
 
-(cd mom_10; . README)
-#(cd mom_025; . README)
-#(cd mom_01; . README)
+#(cd ~/publish_cosima_data/mom_10; . README)
+#(cd ~/publish_cosima_data/mom_025; . README)
+(cd mom_01; . README)
+
+## Note that to invoke this script you will need an interactive session with lots of memory. I used:
+## qsub -I -l walltime=5:00:00 -l mem=192Gb -l ncpus=3 -P v45 -q normalsl
