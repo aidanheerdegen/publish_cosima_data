@@ -83,7 +83,7 @@ done
 # Ice data
 export set SUBMODEL=ice
 vars=( hi_m  hs_m  aice_m vicen_m)
-## Taaking out aicen_m - not saved for first couple of years.
+## Taking out aicen_m - not saved for first couple of years.
 
 
 # Make a grid file because we're going to delete all the grid information and add it back

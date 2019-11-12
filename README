@@ -12,9 +12,10 @@ set -x
 COSIMADIR=/g/data3/hh5/tmp/cosima
 OUTPATH=/g/data1a/ua8/cosima-tmp/publish
 
+# NEED TO UNCOMMENT ONE OF OF THESE
+# THESE TWO RUN QITHIN A SINGLE PBS JOB, LIKE:
+# qsub -I -l walltime=5:00:00 -l mem=192Gb -l ncpus=3 -P v45 -q normalsl README
 #(cd ~/publish_cosima_data/mom_10; . README)
 #(cd ~/publish_cosima_data/mom_025; . README)
-(cd mom_01; . README)
-
-## Note that to invoke this script you will need an interactive session with lots of memory. I used:
-## qsub -I -l walltime=5:00:00 -l mem=192Gb -l ncpus=3 -P v45 -q normalsl
+# THIS ONE RUNS AS BASH SCRIPT AND SPAWNS MANY PBS JOBS:
+#(cd mom_01; . README)
