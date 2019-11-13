@@ -9,8 +9,8 @@ module list
 
 set -x 
 
-COSIMADIR=/g/data3/hh5/tmp/cosima
-OUTPATH=/g/data1a/ua8/cosima-tmp/publish
+export set COSIMADIR=/g/data3/hh5/tmp/cosima
+export set OUTPATH=/g/data1a/ua8/cosima-tmp/publish
 
 # NEED TO UNCOMMENT ONE OF OF THESE
 # THESE TWO RUN QITHIN A SINGLE PBS JOB, LIKE:
