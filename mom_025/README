@@ -9,7 +9,7 @@ SPLITVAR=echo
 # Make a copy of the grid but remove unhelpful coordinate attributes
 # for spatial dimensions
 rm -f ocean_grid.nc
-ncatted -a coordinates,geolon_t,d,, -a coordinates,geolon_c,d,, -a coordinates,geolat_c,d,, -a coordinates,geolat_t,d,, ${COSIMADIR}/${MODEL}/${EXPT}/output048/${SUBMODEL}/ocean_grid.nc ocean_grid.nc
+ncatted -a coordinates,geolon_t,d,, -a coordinates,geolon_c,d,, -a coordinates,geolat_c,d,, -a coordinates,geolat_t,d,, ${COSIMADIR}/${MODEL}/${EXPT}/output000/${SUBMODEL}/ocean_grid.nc ocean_grid.nc
 
 
 ## 3D vars - 20 in total
