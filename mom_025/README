@@ -4,7 +4,7 @@ EXPT=025deg_jra55v13_iaf_gmredi6
 # Ocean data
 SUBMODEL=ocean
 
-SPLITVAR=echo
+SPLITVAR=splitvar
 
 # Make a copy of the grid but remove unhelpful coordinate attributes
 # for spatial dimensions
